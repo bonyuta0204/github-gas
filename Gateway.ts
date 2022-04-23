@@ -1,4 +1,3 @@
-
 export class Gateway {
   token: string;
 
@@ -15,9 +14,7 @@ export class Gateway {
   }
 
   get(path: string, params?: Record<string, string>) {
-    const url = params
-      ? `${path}?${buildQuery(params).toString()}`
-      : `${path}`;
+    const url = params ? `${path}?${buildQuery(params).toString()}` : `${path}`;
 
     const response = UrlFetchApp.fetch(url, {
       method: "get",

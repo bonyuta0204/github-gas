@@ -2,7 +2,6 @@ import { Gateway } from "./Gateway";
 
 const BASE_URL = "https://api.github.com";
 
-
 export class Client {
   gateway: Gateway;
 
@@ -30,17 +29,30 @@ export class Client {
   fetchPullsByOldestId(repo: string, id: number) {
     let pulls = [];
 
-    let {content, rels} = this.gateway.get(`${BASE_URL}/repos/${repo}/pulls`, {directrion: 'desc', sort: 'created_at'})
+    let { content, rels } = this.gateway.get(
+      `${BASE_URL}/repos/${repo}/pulls`,
+      { direction: "desc", sort: "created_at" }
+    );
 
-    pulls = pulls.concat(content)
+    pulls = pulls.concat(content);
 
-    while(rels.next){
-      Logger.log(rels.next)
-      const response = this.gateway.get(rels.next)
-      rels = response.rels
-      pulls = pulls.concat(response.content)
+    while (rels.next) {
+      const response = this.gateway.get(rels.next);
+      rels = response.rels;
+      pulls = pulls.concat(response.content);
+
+      // 指定されているIDよりも小さなIDのPRの存在確認
+      const smallerIdPull = pulls.find((pull) => pull.number <= id);
+
+      if (smallerIdPull) {
+        break;
+      }
     }
 
-    return pulls
+    pulls = pulls.filter((pull) => pull.number >= id);
+    // 昇順に並び替え
+    pulls.reverse();
+
+    return pulls;
   }
 }
