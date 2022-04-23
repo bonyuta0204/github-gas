@@ -25,8 +25,8 @@ export class Client {
    * @param repo {number} PRのID
    */
   fetchPullsByOldestId(repo: string, id: number) {
-    let pulls = []
+    let pulls = [];
 
     //const this.fetchPulls(repo, {sort: 'created', direction: 'desc'})
-  } 
+  }
 }
