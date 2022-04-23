@@ -1,6 +1,9 @@
-const greeter = (person: string) => {
-  return `Hello, ${person}!`;
-}
+import { Client } from "./Client";
 
-let user = 'Grant';
-Logger.log(greeter(user));
+function main() {
+  const token = PropertiesService.getUserProperties().getProperty("GH_TOKEN");
+
+  const client = new Client(token);
+
+  client.fetchPulls("bonyuta0204/dotfiles");
+}
