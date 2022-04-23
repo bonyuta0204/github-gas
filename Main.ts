@@ -1,15 +1,17 @@
 import { Client } from "./Client";
 
-function main() {
+/**
+ * create client instance
+ *
+ * @return {Client} Client Instance
+ */
+function client() {
   const token = PropertiesService.getUserProperties().getProperty("GH_TOKEN");
+  if (!token) {
+    throw new Error(
+      "You have to set github token. Use  setToken() to set token"
+    );
+  }
 
-  const client = new Client(token);
-
-  const pulls = client.fetchPullsByOldestId("microsoft/vscode", 0);
-
-  Logger.log(
-    pulls.map((pull) => {
-      return { number: pull.number, title: pull.title };
-    })
-  );
+  return new Client(token);
 }

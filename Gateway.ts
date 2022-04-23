@@ -14,7 +14,9 @@ export class Gateway {
   }
 
   get(path: string, params?: Record<string, string>) {
-    const url = params ? `${path}?${buildQuery(params).toString()}` : `${path}`;
+    const url = params
+      ? `${path}?${buildQuery_(params).toString()}`
+      : `${path}`;
 
     const response = UrlFetchApp.fetch(url, {
       method: "get",
@@ -22,12 +24,12 @@ export class Gateway {
     });
     return {
       content: JSON.parse(response.getContentText()),
-      rels: parseLinkHeader(response.getHeaders()["Link"]),
+      rels: parseLinkHeader_(response.getHeaders()["Link"]),
     };
   }
 }
 
-const buildQuery = (obj: object, encode: boolean = true): string => {
+const buildQuery_ = (obj: object, encode: boolean = true): string => {
   return Object.keys(obj)
     .map((key) => {
       if (encode) {
@@ -38,7 +40,7 @@ const buildQuery = (obj: object, encode: boolean = true): string => {
     })
     .join("&");
 };
-/*
+/**
  * @description
  * LinkHeaderをパースする
  *
@@ -50,7 +52,7 @@ const buildQuery = (obj: object, encode: boolean = true): string => {
  *    last: "https://api.github.com/repositories/41881900/pulls?page=10"
  *  }
  */
-function parseLinkHeader(
+function parseLinkHeader_(
   linkHeader: string | undefined
 ): Record<string, string> {
   if (!linkHeader) return {};

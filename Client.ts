@@ -31,7 +31,7 @@ export class Client {
 
     let { content, rels } = this.gateway.get(
       `${BASE_URL}/repos/${repo}/pulls`,
-      { direction: "desc", sort: "created_at" }
+      { direction: "desc", sort: "created_at", state: "all" }
     );
 
     pulls = pulls.concat(content);
