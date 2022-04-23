@@ -5,5 +5,7 @@ function main() {
 
   const client = new Client(token);
 
-  client.fetchPulls("bonyuta0204/dotfiles");
+  const pulls = client.fetchPullsByOldestId("microsoft/vscode", 0);
+
+  Logger.log(pulls)
 }

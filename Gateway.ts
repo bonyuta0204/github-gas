@@ -17,8 +17,8 @@ export class Gateway {
 
   get(path: string, params?: Record<string, string>) {
     const url = params
-      ? `${BASE_URL}/${path}?${buildQuery(params).toString()}`
-      : `${BASE_URL}/${path}`;
+      ? `${path}?${buildQuery(params).toString()}`
+      : `${path}`;
 
     const response = UrlFetchApp.fetch(url, {
       method: "get",

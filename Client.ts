@@ -1,5 +1,8 @@
 import { Gateway } from "./Gateway";
 
+const BASE_URL = "https://api.github.com";
+
+
 export class Client {
   gateway: Gateway;
 
@@ -27,6 +30,17 @@ export class Client {
   fetchPullsByOldestId(repo: string, id: number) {
     let pulls = [];
 
-    //const this.fetchPulls(repo, {sort: 'created', direction: 'desc'})
+    let {content, rels} = this.gateway.get(`${BASE_URL}/repos/${repo}/pulls`, {directrion: 'desc', sort: 'created_at'})
+
+    pulls = pulls.concat(content)
+
+    while(rels.next){
+      Logger.log(rels.next)
+      const response = this.gateway.get(rels.next)
+      rels = response.rels
+      pulls = pulls.concat(response.content)
+    }
+
+    return pulls
   }
 }
