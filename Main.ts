@@ -7,5 +7,5 @@ function main() {
 
   const pulls = client.fetchPullsByOldestId("microsoft/vscode", 0);
 
-  Logger.log(pulls)
+  Logger.log(pulls.map((pull)=>{return {number: pull.number, title: pull.title}}));
 }

@@ -1,4 +1,3 @@
-const BASE_URL = "https://api.github.com";
 
 export class Gateway {
   token: string;
@@ -25,7 +24,7 @@ export class Gateway {
       headers: this.headers(),
     });
     return {
-      content: response.getContentText(),
+      content: JSON.parse(response.getContentText()),
       rels: parseLinkHeader(response.getHeaders()["Link"]),
     };
   }
