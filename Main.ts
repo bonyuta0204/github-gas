@@ -15,3 +15,9 @@ function client() {
 
   return new Client(token);
 }
+
+function test() {
+  const token = PropertiesService.getUserProperties().getProperty("GH_TOKEN");
+  const client = new Client(token);
+  client.fetchPullsByOldestId("microsoft/vscode", 0);
+}

@@ -31,7 +31,7 @@ export class Client {
 
     let { content, rels } = this.gateway.get(
       `${BASE_URL}/repos/${repo}/pulls`,
-      { direction: "desc", sort: "created_at", state: "all" }
+      { direction: "desc", sort: "created_at", state: "all", per_page: "100" }
     );
 
     pulls = pulls.concat(content);
@@ -39,6 +39,9 @@ export class Client {
     while (rels.next) {
       const response = this.gateway.get(rels.next);
       rels = response.rels;
+
+      logProgress_(rels);
+
       pulls = pulls.concat(response.content);
 
       // 指定されているIDよりも小さなIDのPRの存在確認
@@ -55,4 +58,11 @@ export class Client {
 
     return pulls;
   }
+}
+
+function logProgress_(rel: Record<string, string>) {
+  const currentPage = (Number(rel.next?.match(/[&\?]page=(\d+)/)[1]) || 1) - 1;
+  const lastPage = rel.last?.match(/[&\?]page=(\d+)/)[1];
+
+  Logger.log(`Fetching page ${currentPage}/${lastPage}`);
 }
