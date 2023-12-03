@@ -9,7 +9,7 @@ function client() {
   const token = PropertiesService.getUserProperties().getProperty("GH_TOKEN");
   if (!token) {
     throw new Error(
-      "You have to set github token. Use  setToken() to set token"
+      "You have to set github token. Use  setToken() to set token",
     );
   }
 

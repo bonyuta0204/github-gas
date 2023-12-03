@@ -53,7 +53,7 @@ const buildQuery_ = (obj: object, encode: boolean = true): string => {
  *  }
  */
 function parseLinkHeader_(
-  linkHeader: string | undefined
+  linkHeader: string | undefined,
 ): Record<string, string> {
   if (!linkHeader) return {};
   var links = linkHeader.split(",");
