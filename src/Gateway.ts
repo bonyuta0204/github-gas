@@ -1,4 +1,6 @@
-import { parseLinkHeader } from "./GitHubHelper";
+import { GitHubHelper } from "./GitHubHelper";
+
+const gitHubHelper = new GitHubHelper();
 
 export class Gateway {
   token: string;
@@ -15,7 +17,7 @@ export class Gateway {
     };
   }
 
-  get(path: string, params?: Record<string, string>) {
+  get<T>(path: string, params?: Record<string, string>) {
     const url = params
       ? `${path}?${buildQuery_(params).toString()}`
       : `${path}`;
@@ -30,8 +32,10 @@ export class Gateway {
     const linkHeader = headers["Link"];
 
     return {
-      content: JSON.parse(response.getContentText()),
-      pageLink: linkHeader ? parseLinkHeader(linkHeader) : undefined,
+      content: JSON.parse(response.getContentText()) as T,
+      pageLink: linkHeader
+        ? gitHubHelper.parseLinkHeader(linkHeader)
+        : undefined,
     };
   }
 }
