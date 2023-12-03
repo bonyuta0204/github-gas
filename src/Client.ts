@@ -1,7 +1,9 @@
 import { Gateway } from "./Gateway";
-import { PageLink, parsePage } from "./GitHubHelper";
+import { PageLink, GitHubHelper, PullListResponse } from "./GitHubHelper";
 
 const BASE_URL = "https://api.github.com";
+
+const githubHelper = new GitHubHelper();
 
 export class Client {
   gateway: Gateway;
@@ -28,35 +30,38 @@ export class Client {
    * @param repo {number} PRのID
    */
   fetchPullsByOldestId(repo: string, id: number) {
-    let pulls: ReturnType<Gateway["get"]>[] = [];
+    let pulls: PullListResponse = [];
 
-    const response = this.gateway.get(`${BASE_URL}/repos/${repo}/pulls`, {
-      direction: "desc",
-      sort: "created_at",
-      state: "all",
-      per_page: "100",
-    });
+    const response = this.gateway.get<PullListResponse>(
+      `${BASE_URL}/repos/${repo}/pulls`,
+      {
+        direction: "desc",
+        sort: "created_at",
+        state: "all",
+        per_page: "100",
+      }
+    );
 
     let pageLink = response.pageLink;
 
     pulls = pulls.concat(response.content);
 
     while (pageLink?.next) {
-      const response = this.gateway.get(pageLink.next);
+      const response = this.gateway.get<PullListResponse>(pageLink.next);
       pageLink = response.pageLink;
       if (pageLink) logProgress(pageLink);
 
       pulls = pulls.concat(response.content);
 
       // 指定されているIDよりも小さなIDのPRの存在確認
-      const smallerIdPull = pulls.find((pull) => pull.content.number <= id);
+      const smallerIdPull = pulls.find((pull) => pull.number <= id);
 
       if (smallerIdPull) {
         break;
       }
     }
 
-    pulls = pulls.filter((pull) => pull.content.number >= id);
+    pulls = pulls.filter((pull) => pull.number >= id);
     // 昇順に並び替え
     pulls.reverse();
 
@@ -65,8 +70,12 @@ export class Client {
 }
 
 function logProgress(pageLink: PageLink) {
-  const currentPage = pageLink.next ? parsePage(pageLink.next) ?? 0 : 0;
-  const lastPage = pageLink.last ? parsePage(pageLink.last) ?? 0 : 0;
+  const currentPage = pageLink.next
+    ? githubHelper.parsePage(pageLink.next) ?? 0
+    : 0;
+  const lastPage = pageLink.last
+    ? githubHelper.parsePage(pageLink.last) ?? 0
+    : 0;
 
   Logger.log(`Fetching page ${currentPage}/${lastPage}`);
 }
