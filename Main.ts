@@ -5,7 +5,7 @@ import { Client } from "./Client";
  *
  * @return {Client} Client Instance
  */
-function client() {
+export function client() {
   const token = PropertiesService.getUserProperties().getProperty("GH_TOKEN");
   if (!token) {
     throw new Error(
@@ -16,8 +16,7 @@ function client() {
   return new Client(token);
 }
 
-function test() {
-  const token = PropertiesService.getUserProperties().getProperty("GH_TOKEN");
-  const client = new Client(token);
-  client.fetchPullsByOldestId("microsoft/vscode", 0);
+export function test() {
+  const c = client();
+  c.fetchPullsByOldestId("microsoft/vscode", 0);
 }

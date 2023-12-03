@@ -1,3 +1,5 @@
+import { parseLinkHeader } from "./GitHubHelper";
+
 export class Gateway {
   token: string;
 
@@ -22,14 +24,22 @@ export class Gateway {
       method: "get",
       headers: this.headers(),
     });
+
+    const headers = response.getHeaders() as Record<string, string>;
+
+    const linkHeader = headers["Link"];
+
     return {
       content: JSON.parse(response.getContentText()),
-      rels: parseLinkHeader_(response.getHeaders()["Link"]),
+      pageLink: linkHeader ? parseLinkHeader(linkHeader) : undefined,
     };
   }
 }
 
-const buildQuery_ = (obj: object, encode: boolean = true): string => {
+const buildQuery_ = (
+  obj: Record<string, string>,
+  encode: boolean = true,
+): string => {
   return Object.keys(obj)
     .map((key) => {
       if (encode) {
@@ -40,27 +50,3 @@ const buildQuery_ = (obj: object, encode: boolean = true): string => {
     })
     .join("&");
 };
-/**
- * @description
- * LinkHeaderをパースする
- *
- * @param {string} linkHeader linkHeaderの文字列 e.g. <https://api.github.com/repositories/41881900/pulls?page=2>; rel="next", <https://api.github.com/repositories/41881900/pulls?page=10>; rel="last"
- *
- * @return パースしたオブジェクト
- *  {
- *    next: "https://api.github.com/repositories/41881900/pulls?page=2",
- *    last: "https://api.github.com/repositories/41881900/pulls?page=10"
- *  }
- */
-function parseLinkHeader_(
-  linkHeader: string | undefined,
-): Record<string, string> {
-  if (!linkHeader) return {};
-  var links = linkHeader.split(",");
-  const rels = {};
-  links.forEach((link) => {
-    const regMatch = link.match(/<(.*)>; rel="(\w+)"/);
-    rels[regMatch[2]] = regMatch[1];
-  });
-  return rels;
-}

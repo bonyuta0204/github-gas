@@ -1,4 +1,5 @@
 import { Gateway } from "./Gateway";
+import { PageLink, parsePage } from "./GitHubHelper";
 
 const BASE_URL = "https://api.github.com";
 
@@ -27,32 +28,35 @@ export class Client {
    * @param repo {number} PRのID
    */
   fetchPullsByOldestId(repo: string, id: number) {
-    let pulls = [];
+    let pulls: ReturnType<Gateway["get"]>[] = [];
 
-    let { content, rels } = this.gateway.get(
-      `${BASE_URL}/repos/${repo}/pulls`,
-      { direction: "desc", sort: "created_at", state: "all", per_page: "100" },
-    );
+    const response = this.gateway.get(`${BASE_URL}/repos/${repo}/pulls`, {
+      direction: "desc",
+      sort: "created_at",
+      state: "all",
+      per_page: "100",
+    });
 
-    pulls = pulls.concat(content);
+    let pageLink = response.pageLink;
 
-    while (rels.next) {
-      const response = this.gateway.get(rels.next);
-      rels = response.rels;
+    pulls = pulls.concat(response.content);
 
-      logProgress_(rels);
+    while (pageLink?.next) {
+      const response = this.gateway.get(pageLink.next);
+      pageLink = response.pageLink;
+      if (pageLink) logProgress(pageLink);
 
       pulls = pulls.concat(response.content);
 
       // 指定されているIDよりも小さなIDのPRの存在確認
-      const smallerIdPull = pulls.find((pull) => pull.number <= id);
+      const smallerIdPull = pulls.find((pull) => pull.content.number <= id);
 
       if (smallerIdPull) {
         break;
       }
     }
 
-    pulls = pulls.filter((pull) => pull.number >= id);
+    pulls = pulls.filter((pull) => pull.content.number >= id);
     // 昇順に並び替え
     pulls.reverse();
 
@@ -60,9 +64,9 @@ export class Client {
   }
 }
 
-function logProgress_(rel: Record<string, string>) {
-  const currentPage = (Number(rel.next?.match(/[&\?]page=(\d+)/)[1]) || 1) - 1;
-  const lastPage = rel.last?.match(/[&\?]page=(\d+)/)[1];
+function logProgress(pageLink: PageLink) {
+  const currentPage = pageLink.next ? parsePage(pageLink.next) ?? 0 : 0;
+  const lastPage = pageLink.last ? parsePage(pageLink.last) ?? 0 : 0;
 
   Logger.log(`Fetching page ${currentPage}/${lastPage}`);
 }
